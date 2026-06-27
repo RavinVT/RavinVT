@@ -1,0 +1,30 @@
+name: Update Discord Widget Stats
+
+on:
+  schedule:
+    - cron: "0 * * * *" # Every hour — adjust as needed
+  workflow_dispatch:     # Also allows manual trigger from GitHub UI
+
+jobs:
+  update-stats:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run stats updater
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          YOUTUBE_CHANNEL_ID: ${{ secrets.YOUTUBE_CHANNEL_ID }}
+          TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
+          TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
+          TWITCH_USERNAME: ${{ secrets.TWITCH_USERNAME }}
+          TWITCH_HOURS_STREAMED: ${{ secrets.TWITCH_HOURS_STREAMED }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+        run: node update_stats.js
