@@ -32,7 +32,11 @@ async function getTwitchStats() {
     `https://id.twitch.tv/oauth2/token?client_id=${clientId}&client_secret=${clientSecret}&grant_type=client_credentials`,
     { method: "POST" }
   );
-  const { access_token } = await tokenRes.json();
+  const tokenData = await tokenRes.json();
+  const access_token = tokenData.access_token;
+
+  console.log("Twitch token status:", tokenRes.status, access_token ? "✅ got token" : "❌ no token");
+  console.log("Looking up Twitch username:", username);
 
   const headers = {
     "Client-Id": clientId,
@@ -45,6 +49,9 @@ async function getTwitchStats() {
     { headers }
   );
   const userData = await userRes.json();
+  console.log("Twitch user response:", JSON.stringify(userData));
+
+  if (!userData.data?.length) throw new Error("Twitch user not found");
   const userId = userData.data[0].id;
 
   // Get follower count
@@ -61,10 +68,6 @@ async function getTwitchStats() {
   );
   const subData = await subRes.json();
 
-  // NOTE: Hours streamed isn't directly available from Twitch API.
-  // Options: track it manually, use a third-party service like SullyGnome,
-  // or store a running total in a file in this repo and increment each run.
-  // For now we fall back to the env var TWITCH_HOURS_STREAMED as a manual override.
   const hoursStreamed = parseInt(process.env.TWITCH_HOURS_STREAMED ?? "0");
 
   return {
